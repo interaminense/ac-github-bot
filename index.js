@@ -1,15 +1,39 @@
-module.exports = app => {
-  // Your code here
-  app.log('Yay, the app was loaded!')
+const getConfig = require('probot-config')
 
-  app.on('issues.opened', async context => {
-    const issueComment = context.issue({ body: 'Thanks for opening this issue!' })
-    return context.github.issues.createComment(issueComment)
+const DEFAULT_OPTS = {
+  "auto_forward" : true,
+  "auto_forward_username": "brianchandotcom",
+  "manual_review_required": true,
+  "ASAH": ["shinnlok"],
+  "FARO": ["shinnlok"],
+  "CEREBRO": ["marcellustavares"]
+}
+
+module.exports = app => {
+  app.on('pull_request', async context => {
+    console.log('on pull request' , context);
   })
 
-  // For more information on building apps:
-  // https://probot.github.io/docs/
+  app.on('pull_request.reopened', async context => {
+    let config = await getConfig(context, 'ac_bot.yml', DEFAULT_OPTS)
 
-  // To get your app running against GitHub, see:
-  // https://probot.github.io/docs/development/
+    console.log('config', config);
+
+    const commits = await context.github.pullRequests.listCommits(context.repo({
+      number: context.payload.pull_request.number
+    }))
+
+    const files = await context.github.pullRequests.listFiles(context.repo({
+      number: context.payload.pull_request.number
+    }))
+
+    const tickets = commits.data.map(element => element.commit).map(commit => commit.message)
+
+    console.log('commits', tickets);
+    console.log('files ', files);
+
+  })
+
+  
+
 }

@@ -4,14 +4,21 @@ const DEFAULT_OPTS = {
   "auto_forward" : true,
   "auto_forward_username": "brianchandotcom",
   "manual_review_required": true,
-  "ASAH": ["shinnlok"],
-  "FARO": ["shinnlok"],
-  "CEREBRO": ["marcellustavares"]
+  "reviewers": {
+    "ASAH" : ["shinnlok"],
+    "FARO" : ["shinnlok"],
+    "CEREBRO": ["marcellustavares"]
+  }
 }
 
 module.exports = app => {
+
+  app.on('check_suite.completed', async context => {
+    console.log('on check_suite completed status', context.payload.check_suite.conclusion);
+  })
+
   app.on('pull_request', async context => {
-    console.log('on pull request' , context);
+    console.log('on pull request');
   })
 
   app.on('pull_request.reopened', async context => {
@@ -30,9 +37,8 @@ module.exports = app => {
     const tickets = commits.data.map(element => element.commit).map(commit => commit.message)
 
     console.log('commits', tickets);
-    console.log('files ', files);
-
-  })
+    
+   })
 
   
 
